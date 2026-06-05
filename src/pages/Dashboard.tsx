@@ -142,14 +142,14 @@ export const Dashboard: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-dark-bg text-brand-text flex flex-col">
+    <div className="min-h-screen bg-dark-bg text-brand-text flex flex-col mesh-gradient-bg">
       <Navbar />
 
       {isAnalyzing && (
         <LoadingScreen fileName={fileName} onComplete={handleAnimationComplete} />
       )}
 
-      <div className="flex flex-1 pt-16 sm:pt-20">
+      <div className="flex flex-1 pt-16 sm:pt-20 relative z-10">
         {/* Sidebar */}
         <Sidebar />
 
@@ -161,7 +161,7 @@ export const Dashboard: React.FC = () => {
               <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Recruitment Dashboard</h1>
               <p className="text-xs text-gray-400">Manage parsed resumes, explore target metrics, and improve candidate qualifications.</p>
             </div>
-            <div className="flex items-center gap-2 text-xs text-gray-500 font-mono bg-[#111827] border border-white/5 py-1.5 px-3 rounded-xl">
+            <div className="flex items-center gap-2 text-xs text-gray-500 font-mono bg-[#111827]/70 border border-white/5 py-1.5 px-3 rounded-xl">
               <TrendingUp className="w-3.5 h-3.5 text-brand-accent animate-pulse" />
               Recruiter Hub: Active
             </div>
@@ -170,7 +170,7 @@ export const Dashboard: React.FC = () => {
           {tab === 'overview' ? (
             <>
               {/* Top Resume Upload Panel */}
-              <div className="glass p-6 sm:p-8 rounded-3xl border border-white/5 relative overflow-hidden">
+              <div className="glass glow-border p-6 sm:p-8 rounded-3xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary/5 rounded-full blur-3xl pointer-events-none"></div>
                 <div className="space-y-4 mb-6 text-center">
                   <h2 className="text-lg sm:text-xl font-bold">New Resume Scan</h2>

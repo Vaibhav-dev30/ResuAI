@@ -144,6 +144,35 @@
   background: linear-gradient(135deg, rgba(99, 102, 241, 0.4), rgba(6, 182, 212, 0.3) 50%, rgba(255, 255, 255, 0.05));
 }
 
+/* Print layout styles for generating clean PDF report audits */
+@media print {
+  body, .mesh-gradient-bg {
+    background: #0f172a !important;
+    color: #f8fafc !important;
+  }
+  nav, sidebar, button, .no-print, header, footer {
+    display: none !important;
+  }
+  main {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+  .glass, .glass-card {
+    background: rgba(30, 41, 59, 0.7) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: none !important;
+  }
+  .mesh-gradient-bg::before,
+  .mesh-gradient-bg::after {
+    display: none !important;
+  }
+  .grid {
+    grid-template-cols: 1fr !important;
+  }
+}
+
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

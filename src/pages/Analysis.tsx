@@ -12,7 +12,8 @@ import {
   ThumbsDown,
   Mail,
   Phone,
-  Loader2
+  Loader2,
+  Printer
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import ATSScoreCard from '../components/ATSScoreCard';
@@ -207,14 +208,22 @@ export const Analysis: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex md:flex-col justify-end gap-3 shrink-0 items-center md:items-end">
+          <div className="flex md:flex-col justify-end gap-3 shrink-0 items-center md:items-end no-print">
             <span className="text-[10px] text-gray-500 font-mono">Analyzed on {analysis.uploadedAt}</span>
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="px-4 py-2 text-xs font-semibold bg-gradient-to-r from-brand-primary to-brand-secondary text-brand-text rounded-xl shadow-md transform active:scale-95 transition-all cursor-pointer"
-            >
-              Upload New Resume
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={() => window.print()}
+                className="px-4 py-2 text-xs font-semibold bg-white/5 hover:bg-white/10 border border-white/10 hover:border-brand-primary/30 text-brand-text rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                <Printer className="w-3.5 h-3.5" /> Export PDF Report
+              </button>
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="px-4 py-2 text-xs font-semibold bg-gradient-to-r from-brand-primary to-brand-secondary text-brand-text rounded-xl shadow-md transform active:scale-95 transition-all cursor-pointer"
+              >
+                Upload New Resume
+              </button>
+            </div>
           </div>
         </div>
 
