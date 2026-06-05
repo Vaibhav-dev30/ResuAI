@@ -75,6 +75,75 @@
   }
 }
 
+/* Premium Animated Mesh Gradient Background */
+.mesh-gradient-bg {
+  position: relative;
+  background-color: #05070c;
+  overflow: hidden;
+}
+
+.mesh-gradient-bg::before,
+.mesh-gradient-bg::after {
+  content: "";
+  position: absolute;
+  width: 450px;
+  height: 450px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.08) 50%, transparent 100%);
+  filter: blur(80px);
+  z-index: 0;
+  pointer-events: none;
+  animation: drift 25s infinite alternate ease-in-out;
+}
+
+.mesh-gradient-bg::before {
+  top: -10%;
+  left: -10%;
+}
+
+.mesh-gradient-bg::after {
+  bottom: -15%;
+  right: -10%;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.12) 0%, rgba(99, 102, 241, 0.05) 50%, transparent 100%);
+  animation-duration: 35s;
+  animation-delay: -5s;
+}
+
+@keyframes drift {
+  0% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+  }
+  50% {
+    transform: translate(100px, 80px) scale(1.2) rotate(180deg);
+  }
+  100% {
+    transform: translate(-50px, -30px) scale(0.9) rotate(360deg);
+  }
+}
+
+/* Card border glow effects */
+.glow-border {
+  position: relative;
+}
+
+.glow-border::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02) 50%, rgba(99, 102, 241, 0.2));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.glow-border:hover::after {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.4), rgba(6, 182, 212, 0.3) 50%, rgba(255, 255, 255, 0.05));
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

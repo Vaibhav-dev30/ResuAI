@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 
 interface ATSScoreCardProps {
   score: number;
@@ -31,7 +32,22 @@ export const ATSScoreCard: React.FC<ATSScoreCardProps> = ({ score }) => {
   const rating = getScoreRating(score);
 
   return (
-    <div className="glass-card p-6 rounded-2xl border border-white/5 flex flex-col items-center justify-center text-center">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+      whileHover={{ y: -3 }}
+      className="glass-card glow-border p-6 rounded-2xl flex flex-col items-center justify-center text-center"
+      style={{
+        boxShadow: score >= 85 
+          ? '0 0 35px -10px rgba(16, 185, 129, 0.18)' 
+          : score >= 70 
+          ? '0 0 35px -10px rgba(6, 182, 212, 0.18)' 
+          : score >= 50 
+          ? '0 0 35px -10px rgba(245, 158, 11, 0.15)' 
+          : '0 0 35px -10px rgba(239, 68, 68, 0.18)'
+      }}
+    >
       <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-6">ATS Score Evaluation</h3>
       
       <div className="relative flex items-center justify-center">
@@ -85,7 +101,8 @@ export const ATSScoreCard: React.FC<ATSScoreCardProps> = ({ score }) => {
             : 'Parser may struggle to map your experience. Adjust layout.'}
         </p>
       </div>
-    </div>
+    </motion.div>
   );
 };
 export default ATSScoreCard;
+

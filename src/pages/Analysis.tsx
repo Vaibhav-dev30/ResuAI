@@ -29,6 +29,17 @@ export const Analysis: React.FC = () => {
   const [analysis, setAnalysis] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Suggestions & Highlight States
+  const [activeSuggestionId, setActiveSuggestionId] = useState<string | null>(null);
+  const [resolvedSuggestions, setResolvedSuggestions] = useState<Record<string, boolean>>({});
+
+  // JD Matcher States
+  const [jdText, setJdText] = useState('');
+  const [jdMatchScore, setJdMatchScore] = useState<number | null>(null);
+  const [jdMatchedKeywords, setJdMatchedKeywords] = useState<string[]>([]);
+  const [jdMissingKeywords, setJdMissingKeywords] = useState<string[]>([]);
+  const [isJDAnalyzing, setIsJDAnalyzing] = useState(false);
+
   useEffect(() => {
     const fetchAnalysis = async () => {
       if (!id) return;
@@ -58,6 +69,51 @@ export const Analysis: React.FC = () => {
     );
   }
 
+  // Calculate dynamic display ATS score based on resolved sandbox improvements
+  const resolvedCount = Object.values(resolvedSuggestions).filter(Boolean).length;
+  const displayATSScore = Math.min(100, analysis.atsScore + resolvedCount * 5);
+
+  const handleResolveSuggestion = (suggestionId: string, isResolved: boolean) => {
+    setResolvedSuggestions(prev => ({
+      ...prev,
+      [suggestionId]: isResolved
+    }));
+  };
+
+  const handleJDMatch = () => {
+    if (!jdText.trim()) return;
+    setIsJDAnalyzing(true);
+    
+    setTimeout(() => {
+      const textLower = jdText.toLowerCase();
+      // Compile skills from candidate report
+      const candidateSkills = [
+        ...analysis.technicalSkills.map((s: any) => s.name.toLowerCase()),
+        ...analysis.softSkills.map((s: any) => s.name.toLowerCase())
+      ];
+      
+      // Keywords to check in the JD
+      const allKeywords = [
+        'react', 'typescript', 'javascript', 'next.js', 'docker', 'kubernetes', 'aws', 
+        'jest', 'cypress', 'sql', 'python', 'pytorch', 'mlflow', 'confluence', 'jira', 
+        'mixpanel', 'amplitude', 'agile', 'scrum', 'ci/cd', 'github actions'
+      ];
+      
+      const foundInJD = allKeywords.filter(kw => textLower.includes(kw));
+      const matched = foundInJD.filter(kw => candidateSkills.some(cs => cs.includes(kw) || kw.includes(cs)));
+      const missing = foundInJD.filter(kw => !candidateSkills.some(cs => cs.includes(kw) || kw.includes(cs)));
+      
+      let baseScore = 50;
+      if (foundInJD.length > 0) {
+        baseScore = Math.round((matched.length / foundInJD.length) * 100);
+      }
+      
+      setJdMatchedKeywords(matched.map(k => k.charAt(0).toUpperCase() + k.slice(1)));
+      setJdMissingKeywords(missing.map(k => k.charAt(0).toUpperCase() + k.slice(1)));
+      setJdMatchScore(baseScore);
+      setIsJDAnalyzing(false);
+    }, 1200); // 1.2s simulation delay
+  };
 
   // Radar data mapped depending on candidate profile
   const getRadarData = (candidateId: string) => {
@@ -107,10 +163,10 @@ export const Analysis: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-dark-bg text-brand-text flex flex-col">
+    <div className="min-h-screen bg-dark-bg text-brand-text flex flex-col mesh-gradient-bg">
       <Navbar />
 
-      <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16 space-y-6">
+      <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16 space-y-6 relative z-10">
         {/* Navigation & Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <button
@@ -128,7 +184,7 @@ export const Analysis: React.FC = () => {
         </div>
 
         {/* Profile Card Header */}
-        <div className="glass p-6 rounded-3xl border border-white/5 flex flex-col md:flex-row justify-between gap-6 relative overflow-hidden">
+        <div className="glass glow-border p-6 rounded-3xl flex flex-col md:flex-row justify-between gap-6 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-brand-secondary/5 rounded-full blur-3xl pointer-events-none"></div>
           
           <div className="space-y-4">
@@ -166,7 +222,7 @@ export const Analysis: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
           {/* Left Panel: Simulated Resume Preview */}
-          <div className="lg:col-span-5 space-y-4">
+          <div className="lg:col-span-5 space-y-4 lg:sticky lg:top-24">
             <div className="glass rounded-3xl border border-white/5 overflow-hidden flex flex-col h-[700px]">
               {/* Header tabs */}
               <div className="flex items-center justify-between px-4 py-3 bg-[#0E1320] border-b border-white/5 text-xs">
@@ -226,10 +282,34 @@ export const Analysis: React.FC = () => {
                             <span>2023 - Present</span>
                           </div>
                           <p className="text-[10px] text-gray-500 font-semibold italic">Tech Solutions Inc. - SF, CA</p>
-                          <ul className="list-disc pl-4 space-y-1 text-gray-600 text-[10px]">
-                            <li>Developed scalable system modules and automated deployment pipelines, improving deploy efficiency.</li>
-                            <li>Mentored junior engineers and conducted code architecture audits to guarantee product performance.</li>
-                            <li>Integrated dashboard analytics to track service behaviors and latency bottlenecks.</li>
+                          <ul className="list-disc pl-4 space-y-2 text-gray-600 text-[10px]">
+                            <li className={`transition-all duration-300 rounded p-1.5 ${
+                              activeSuggestionId === 'sug_rev_1'
+                                ? 'bg-brand-primary/10 border-l-2 border-brand-primary text-gray-950 font-medium'
+                                : ''
+                            }`}>
+                              {resolvedSuggestions['sug_rev_1'] 
+                                ? 'Automated deployment pipelines and expanded Jest unit tests, reducing deployment failures by 28% and increasing code coverage from 60% to 85%.'
+                                : 'Developed scalable system modules and automated deployment pipelines, improving deploy efficiency.'
+                              }
+                            </li>
+                            <li className={`transition-all duration-300 rounded p-1.5 ${
+                              activeSuggestionId === 'sug_rev_2'
+                                ? 'bg-brand-primary/10 border-l-2 border-brand-primary text-gray-950 font-medium'
+                                : ''
+                            }`}>
+                              {resolvedSuggestions['sug_rev_2'] 
+                                ? 'Mentored junior engineers and conducted code architecture audits using Docker and Cypress testing frameworks.'
+                                : 'Mentored junior engineers and conducted code architecture audits to guarantee product performance.'
+                              }
+                            </li>
+                            <li className={`transition-all duration-300 rounded p-1.5 ${
+                              activeSuggestionId === 'sug_rev_3'
+                                ? 'bg-brand-primary/10 border-l-2 border-brand-primary text-gray-950 font-medium'
+                                : ''
+                            }`}>
+                              Integrated dashboard analytics to track service behaviors and latency bottlenecks.
+                            </li>
                           </ul>
                         </div>
 
@@ -289,7 +369,7 @@ export const Analysis: React.FC = () => {
             
             {/* Top overview (Circular score card + Stats + Radar chart) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <ATSScoreCard score={analysis.atsScore} />
+              <ATSScoreCard score={displayATSScore} />
               
               <ChartCard
                 title="Capability Matrix vs Benchmark"
@@ -323,6 +403,115 @@ export const Analysis: React.FC = () => {
                   color="success"
                 />
               </div>
+            </div>
+
+            {/* Job Description Matcher Section */}
+            <div className="glass glow-border p-6 rounded-2xl border border-white/5 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold text-brand-text flex items-center gap-2">
+                  <Sparkles className="w-4.5 h-4.5 text-brand-accent" />
+                  Job Description Heatmap Matcher
+                </h3>
+                {jdMatchScore !== null && (
+                  <span className={`text-xs font-bold font-mono px-2.5 py-1 rounded-lg border ${
+                    jdMatchScore >= 80 
+                      ? 'bg-brand-success/10 border-brand-success/20 text-brand-success' 
+                      : jdMatchScore >= 60 
+                      ? 'bg-brand-accent/10 border-brand-accent/20 text-brand-accent'
+                      : 'bg-red-500/10 border-red-500/20 text-red-400'
+                  }`}>
+                    Match: {jdMatchScore}%
+                  </span>
+                )}
+              </div>
+              <p className="text-[11px] text-gray-400 leading-relaxed">
+                Paste the job description of the target vacancy below to execute a real-time keyword overlap scan.
+              </p>
+              
+              <div className="space-y-3">
+                <textarea
+                  value={jdText}
+                  onChange={(e) => setJdText(e.target.value)}
+                  placeholder="Paste job posting details here... (e.g. Requires React, TypeScript, Docker, Cypress, CI/CD)"
+                  rows={3}
+                  className="w-full text-xs p-3 bg-dark-bg/60 border border-white/10 rounded-xl text-brand-text focus:outline-none focus:border-brand-primary/50 font-sans resize-none"
+                />
+
+                <div className="flex justify-end">
+                  <button
+                    onClick={handleJDMatch}
+                    disabled={isJDAnalyzing || !jdText.trim()}
+                    className="px-4 py-2 text-xs font-semibold bg-brand-primary hover:bg-brand-primary/80 disabled:bg-white/5 disabled:text-gray-500 text-brand-text rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer"
+                  >
+                    {isJDAnalyzing ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" /> Analyzing Overlap...
+                      </>
+                    ) : (
+                      'Analyze Match Heatmap'
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Heatmap Visual Matrix */}
+              {jdMatchScore !== null && (
+                <div className="pt-4 border-t border-white/5 space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <span className="text-[10px] font-mono text-brand-success uppercase tracking-wider block font-bold">Matched Keywords ({jdMatchedKeywords.length})</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {jdMatchedKeywords.length > 0 ? (
+                          jdMatchedKeywords.map((kw, i) => (
+                            <span key={i} className="text-[10px] px-2 py-0.5 rounded bg-brand-success/10 border border-brand-success/20 text-brand-success font-medium">
+                              {kw}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-[10px] text-gray-500">None detected.</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <span className="text-[10px] font-mono text-red-400 uppercase tracking-wider block font-bold">Missing JD Gaps ({jdMissingKeywords.length})</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {jdMissingKeywords.length > 0 ? (
+                          jdMissingKeywords.map((kw, i) => (
+                            <span key={i} className="text-[10px] px-2 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-red-400 font-medium">
+                              {kw}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-[10px] text-brand-success">0 Gaps! Perfect match.</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Grid heatmap display */}
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-mono text-gray-400 uppercase tracking-widest block">JD Overlap Coverage Matrix</span>
+                    <div className="grid grid-cols-10 gap-1.5">
+                      {Array.from({ length: 20 }).map((_, i) => {
+                        let cellBg = 'bg-white/5';
+                        if (jdMatchScore !== null) {
+                          const limit = Math.round((jdMatchScore / 100) * 20);
+                          cellBg = i < limit ? 'bg-brand-success/20 border-brand-success/30' : 'bg-red-950/20 border-red-900/30';
+                        }
+                        return (
+                          <div 
+                            key={i} 
+                            className={`h-6 rounded-md border flex items-center justify-center text-[9px] font-mono text-gray-500 transition-all duration-500 ${cellBg}`}
+                          >
+                            #{i + 1}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Strengths & Weaknesses Cards */}
@@ -424,7 +613,13 @@ export const Analysis: React.FC = () => {
 
               <div className="space-y-4">
                 {analysis.suggestions.map((suggestion: any) => (
-                  <SuggestionCard key={suggestion.id} suggestion={suggestion} />
+                  <SuggestionCard 
+                    key={suggestion.id} 
+                    suggestion={suggestion} 
+                    isActive={activeSuggestionId === suggestion.id}
+                    onSelect={() => setActiveSuggestionId(suggestion.id)}
+                    onResolve={handleResolveSuggestion}
+                  />
                 ))}
               </div>
             </div>
