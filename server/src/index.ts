@@ -18,10 +18,7 @@ const upload = multer({
 });
 
 // Middlewares
-app.use(cors({
-  origin: ['http://localhost:5173', 'http://cheerful-frangipane-38e573.netlify.app'], // Include local and deployed Netlify client urls
-  credentials: true
-}));
+app.use(cors());
 app.use(express.json());
 
 // Heartbeat route
