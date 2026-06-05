@@ -60,8 +60,20 @@ export class AnalysisController {
       // Save skills
       if (scoreReport.technicalSkills.length > 0 || scoreReport.softSkills.length > 0) {
         const skillsToInsert = [
-          ...scoreReport.technicalSkills.map(s => ({ ...s, analysis_id: analysisId })),
-          ...scoreReport.softSkills.map(s => ({ ...s, analysis_id: analysisId }))
+          ...scoreReport.technicalSkills.map(s => ({
+            name: s.name,
+            category: s.category,
+            match_percent: s.matchPercent,
+            rating: s.rating,
+            analysis_id: analysisId
+          })),
+          ...scoreReport.softSkills.map(s => ({
+            name: s.name,
+            category: s.category,
+            match_percent: s.matchPercent,
+            rating: s.rating,
+            analysis_id: analysisId
+          }))
         ];
         
         const { error: skillsError } = await supabase
@@ -73,7 +85,13 @@ export class AnalysisController {
 
       // Save missing skills
       if (scoreReport.missingSkills.length > 0) {
-        const missingToInsert = scoreReport.missingSkills.map(s => ({ ...s, analysis_id: analysisId }));
+        const missingToInsert = scoreReport.missingSkills.map(s => ({
+          name: s.name,
+          importance: s.importance,
+          alternative_suggest: s.alternativeSuggest,
+          analysis_id: analysisId
+        }));
+        
         const { error: missingError } = await supabase
           .from('missing_skills')
           .insert(missingToInsert);
@@ -83,7 +101,16 @@ export class AnalysisController {
 
       // Save suggestions
       if (scoreReport.suggestions.length > 0) {
-        const suggestionsToInsert = scoreReport.suggestions.map(s => ({ ...s, analysis_id: analysisId }));
+        const suggestionsToInsert = scoreReport.suggestions.map(s => ({
+          category: s.category,
+          title: s.title,
+          description: s.description,
+          priority: s.priority,
+          before_text: s.beforeText || null,
+          after_text: s.afterText || null,
+          analysis_id: analysisId
+        }));
+        
         const { error: suggestionsError } = await supabase
           .from('suggestions')
           .insert(suggestionsToInsert);
@@ -93,7 +120,12 @@ export class AnalysisController {
 
       // Save industry matches
       if (scoreReport.industryMatches.length > 0) {
-        const industryToInsert = scoreReport.industryMatches.map(s => ({ ...s, analysis_id: analysisId }));
+        const industryToInsert = scoreReport.industryMatches.map(s => ({
+          name: s.name,
+          score: s.score,
+          analysis_id: analysisId
+        }));
+        
         const { error: industryError } = await supabase
           .from('industry_matches')
           .insert(industryToInsert);
