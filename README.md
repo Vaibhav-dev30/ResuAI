@@ -277,7 +277,7 @@ See the full [LICENSE](./LICENSE) file for details.
 
 <div align="center">
 
-**Made with ❤️ by [YOUR_NAME](https://github.com/YOUR_USERNAME)**
+**Made with ❤️ by [Vaibhav](https://github.com/Vaibhav-dev30)**
 
 © 2025 ResuAI. All rights reserved.
 
